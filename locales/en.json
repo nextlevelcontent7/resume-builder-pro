@@ -1,0 +1,18 @@
+{
+  "notFound": "Resource not found",
+  "serverError": "Server error",
+  "welcome": "Welcome to Resume Builder Pro API",
+  "ok": "Operation completed successfully",
+  "resumeCreated": "Resume created successfully",
+  "resumeUpdated": "Resume updated successfully",
+  "resumeDeleted": "Resume deleted successfully",
+  "createFailed": "Failed to create resume",
+  "updateFailed": "Failed to update resume",
+  "deleteFailed": "Failed to delete resume",
+  "resumeNotFound": "Resume not found",
+  "pdfGenerated": "PDF generated successfully",
+  "exportFailed": "Failed to generate PDF",
+  "education": "Education",
+  "experience": "Experience",
+  "skills": "Skills"
+}
