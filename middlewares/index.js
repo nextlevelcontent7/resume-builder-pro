@@ -6,5 +6,6 @@ module.exports = {
   requestId: require('./requestId'),
   userAuditLogger: require('./userAuditLogger'),
   errorParser: require('./errorParser'),
+  rateLimiter: require('./rateLimiter'),
   checkUser: require('./auth/checkUser'),
 };

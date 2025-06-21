@@ -6,7 +6,7 @@ function run() {
   assert(!validators.isEmail('bad-email'), 'Invalid email passed');
   assert(validators.isPhone('+1234567890'), 'Valid phone failed');
   assert(!validators.isPhone('123'), 'Invalid phone passed');
-  console.log('All tests passed');
+  console.log('validator tests passed');
 }
 
-run();
+module.exports = run;

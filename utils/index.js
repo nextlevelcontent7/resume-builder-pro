@@ -6,4 +6,6 @@ module.exports = {
   dateUtils: require('./dateUtils'),
   fileUtils: require('./fileUtils'),
   validationUtils: require('./validationUtils'),
+  printUtils: require('./printUtils'),
+  i18nUtils: require('./i18nUtils'),
 };
