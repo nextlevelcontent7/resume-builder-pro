@@ -23,4 +23,13 @@ function isURL(url) {
   try { new URL(url); return true; } catch { return false; }
 }
 
-module.exports = { isObjectId, isEmail, isPhone, isURL };
+const { isPostalCode, isStrongPassword } = require('./validationUtils');
+
+module.exports = {
+  isObjectId,
+  isEmail,
+  isPhone,
+  isURL,
+  isPostalCode,
+  isStrongPassword,
+};

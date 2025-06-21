@@ -25,6 +25,11 @@ function run() {
 
   assert(validators.isURL('http://example.com'), 'Valid URL failed');
   assert(!validators.isURL('bad_url'), 'Invalid URL passed');
+  assert(validators.isPostalCode('12345'), 'Valid US postal code failed');
+  assert(validators.isPostalCode('A1A 1A1', 'CA'), 'Valid CA postal code failed');
+  assert(!validators.isPostalCode('zzz'), 'Invalid postal code passed');
+  assert(validators.isStrongPassword('Aa1!aaaa'), 'Strong password check failed');
+  assert(!validators.isStrongPassword('weak'), 'Weak password passed');
   console.log('utils tests passed');
 }
 
