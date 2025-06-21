@@ -1,10 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const { auth } = require('../middlewares');
+const router = require('express').Router();
+const adminRoutes = require('../routes/adminRoutes');
 
-// Example admin-only endpoint
-router.get('/stats', auth, (req, res) => {
-  res.json({ uptime: process.uptime() });
-});
+// This router simply delegates to api admin routes
+router.use('/', adminRoutes);
 
 module.exports = router;

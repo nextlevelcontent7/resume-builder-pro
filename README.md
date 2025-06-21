@@ -34,6 +34,10 @@ npm run dev  # start development server on http://localhost:3000
 
 The app provides a resume form with preview/export features and supports both English and Arabic languages with RTL layout.
 
+### Admin Panel
+
+The application ships with an admin dashboard accessible under `/admin`. Authenticate using the `admin-token` value in the `Authorization` header. From the dashboard you can manage users, review resumes and toggle feature flags such as watermarking or export formats.
+
 ## Docker
 
 To run the API and MongoDB using Docker:

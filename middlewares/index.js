@@ -8,5 +8,6 @@ module.exports = {
   errorParser: require('./errorParser'),
   rateLimiter: require('./rateLimiter'),
   checkUser: require('./auth/checkUser'),
+  adminOnly: require('./adminOnly'),
   swagger: require('./swagger'),
 };

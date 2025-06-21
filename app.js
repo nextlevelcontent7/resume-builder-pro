@@ -43,8 +43,10 @@ app.use('/exports', express.static(path.join(__dirname, 'exports')));
 // Register application routes
 const baseRoutes = require('./routes');
 const resumeRoutes = require('./routes/resumeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 app.use('/api', baseRoutes);
 app.use('/api/resumes', resumeRoutes);
+app.use('/api/admin', adminRoutes);
 app.get('/api-docs', swagger);
 
 // Handle 404 errors
