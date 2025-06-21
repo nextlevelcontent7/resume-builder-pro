@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 const emptyEdu = { degree: '', school: '', startDate: '', endDate: '' };
 const emptyExp = { jobTitle: '', company: '', startDate: '', endDate: '', description: '' };
@@ -16,6 +17,7 @@ export default function ResumeForm() {
   const [languageInput, setLanguageInput] = useState({ language: '', level: '' });
   const [profileImage, setProfileImage] = useState(null);
   const [downloadLink, setDownloadLink] = useState('');
+  const [resumeId, setResumeId] = useState('');
   const [error, setError] = useState('');
 
   const handlePersonalChange = (e) => {
@@ -60,6 +62,7 @@ export default function ResumeForm() {
   const handleSubmit = async () => {
     setError('');
     setDownloadLink('');
+    setResumeId('');
     try {
       const data = {
         personalInfo: personal,
@@ -78,6 +81,7 @@ export default function ResumeForm() {
       });
       const id = createRes.data?.data?._id;
       if (id) {
+        setResumeId(id);
         const exportRes = await axios.get(`/api/resumes/${id}/export`);
         setDownloadLink(exportRes.data?.data?.url || '');
       }
@@ -163,6 +167,11 @@ export default function ResumeForm() {
         <a href={downloadLink} className="text-blue-500 underline" target="_blank" rel="noopener noreferrer">
           {t('exportSuccess')}
         </a>
+      )}
+      {resumeId && (
+        <Link to={`/preview/${resumeId}`} className="text-green-600 underline block mt-2">
+          {t('preview')}
+        </Link>
       )}
 
       <div className="space-x-2">

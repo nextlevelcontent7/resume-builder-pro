@@ -28,5 +28,9 @@
   "light": "Light",
   "resumeCreated": "Resume created successfully",
   "exportSuccess": "PDF generated successfully",
-  "error": "Something went wrong"
+  "error": "Something went wrong",
+  "loading": "Loading...",
+  "loadError": "Failed to load resume",
+  "downloadPDF": "Download PDF",
+  "print": "Print"
 }

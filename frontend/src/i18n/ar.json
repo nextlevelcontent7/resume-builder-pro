@@ -28,5 +28,9 @@
   "light": "فاتح",
   "resumeCreated": "تم إنشاء السيرة الذاتية بنجاح",
   "exportSuccess": "تم إنشاء ملف PDF بنجاح",
-  "error": "حدث خطأ ما"
+  "error": "حدث خطأ ما",
+  "loading": "جاري التحميل...",
+  "loadError": "فشل تحميل السيرة الذاتية",
+  "downloadPDF": "تحميل PDF",
+  "print": "طباعة"
 }
