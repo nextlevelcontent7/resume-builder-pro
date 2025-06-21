@@ -6,6 +6,14 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
 
 /**
+ * Very small sanitizer to strip <script> tags. In production
+ * a more robust library like DOMPurify should be used.
+ */
+function sanitizeHtml(input) {
+  return input.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+}
+
+/**
  * Format a date range using the provided locale.
  */
 function formatDateRange(start, end, locale) {
@@ -49,8 +57,10 @@ function renderHtml(resume, locale, theme) {
  * Generate resume export in desired format.
  * Supported formats: pdf (default) and png.
  */
-async function generate(resume, locale = 'en', theme = 'default', format = 'pdf') {
-  const html = renderHtml(resume, locale, theme);
+async function generate(resume, locale = 'en', theme = 'default', format = 'pdf', options = {}) {
+  const html = sanitizeHtml(renderHtml(resume, locale, theme));
+
+  const { watermark = true } = options;
 
   const exportsDir = path.join(__dirname, '..', 'exports');
   if (!fs.existsSync(exportsDir)) {
@@ -72,18 +82,22 @@ async function generate(resume, locale = 'en', theme = 'default', format = 'pdf'
   const doc = await PDFDocument.load(basePdf);
   doc.setTitle('Resume');
   doc.setCreator('Resume Builder Pro');
+  doc.setSubject('Generated Resume');
+  doc.setKeywords(['resume', 'builder', 'pdf']);
   const font = await doc.embedFont(StandardFonts.Helvetica);
-  doc.getPages().forEach((page) => {
-    const { width } = page.getSize();
-    page.drawText('Resume Builder Pro', {
-      x: width / 2 - 60,
-      y: 20,
-      font,
-      size: 10,
-      color: rgb(0.75, 0.75, 0.75),
-      opacity: 0.5,
+  if (watermark) {
+    doc.getPages().forEach((page) => {
+      const { width } = page.getSize();
+      page.drawText('Resume Builder Pro', {
+        x: width / 2 - 60,
+        y: 20,
+        font,
+        size: 10,
+        color: rgb(0.75, 0.75, 0.75),
+        opacity: 0.5,
+      });
     });
-  });
+  }
   const pdfBuffer = await doc.save();
 
   if (format === 'pdf') {

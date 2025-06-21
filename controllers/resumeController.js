@@ -1,5 +1,6 @@
 const { success, error } = require('../utils/formatResponse');
 const { resumeService } = require('../services');
+const { validationResult } = require('express-validator');
 const path = require('path');
 
 /**
@@ -7,6 +8,11 @@ const path = require('path');
  */
 async function createResume(req, res) {
   try {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      const msg = result.array({ onlyFirstError: true })[0].msg;
+      return res.status(422).json(error(req, 'validationFailed', msg));
+    }
     const data = req.body;
 
     if (req.files && req.files.profileImage) {
@@ -104,6 +110,11 @@ async function getResumeById(req, res) {
  */
 async function updateResume(req, res) {
   try {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      const msg = result.array({ onlyFirstError: true })[0].msg;
+      return res.status(422).json(error(req, 'validationFailed', msg));
+    }
     const updates = req.body;
 
     if (req.files && req.files.profileImage) {
@@ -154,6 +165,35 @@ async function deleteResume(req, res) {
 }
 
 /**
+ * Archive a resume instead of deleting
+ */
+async function archiveResume(req, res) {
+  try {
+    const resume = await resumeService.archive(req.params.id);
+    if (!resume) {
+      return res.status(404).json(error(req, 'resumeNotFound'));
+    }
+    return res.json(success(req, 'resumeArchived', resume));
+  } catch (err) {
+    err.messageKey = 'archiveFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Get resume analytics summary
+ */
+async function getAnalytics(req, res) {
+  try {
+    const stats = await resumeService.analytics();
+    return res.json(success(req, 'ok', stats));
+  } catch (err) {
+    err.messageKey = 'analyticsFailed';
+    return res.status(500).json(error(req, err.messageKey));
+  }
+}
+
+/**
  * Export resume as PDF/PNG and return download link.
  */
 async function exportResume(req, res) {
@@ -184,4 +224,6 @@ module.exports = {
   listResumes,
   searchResumes,
   duplicateResume,
+  archiveResume,
+  getAnalytics,
 };

@@ -1,7 +1,7 @@
 // Express application setup with common middleware
 const express = require('express');
 const cors = require('cors');
-const { notFound, errorHandler, logger, requestId } = require('./middlewares');
+const { notFound, errorHandler, logger, requestId, userAuditLogger, errorParser } = require('./middlewares');
 const path = require('path');
 const i18n = require('./utils/i18n');
 
@@ -15,6 +15,9 @@ app.use(cors());
 
 // Attach request ID for traceability
 app.use(requestId);
+
+// Audit log each request after user is attached
+app.use(userAuditLogger);
 
 // Request logging
 app.use(logger.morganMiddleware);
@@ -32,6 +35,10 @@ app.use('/api', baseRoutes);
 app.use('/api/resumes', resumeRoutes);
 
 // Handle 404 errors
+
+// Translate common validation errors
+app.use(errorParser);
+
 app.use(notFound);
 
 // Generic error handler

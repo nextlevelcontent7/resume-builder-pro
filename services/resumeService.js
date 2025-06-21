@@ -49,6 +49,23 @@ class ResumeService {
     return Resume.findByIdAndDelete(id);
   }
 
+  /** Archive resume by ID without deleting */
+  async archive(id) {
+    return Resume.findByIdAndUpdate(id, { 'settings.archived': true }, { new: true });
+  }
+
+  /** Return counts by status for analytics */
+  async analytics() {
+    const pipeline = [
+      { $group: { _id: '$settings.status', count: { $sum: 1 } } },
+    ];
+    const data = await Resume.aggregate(pipeline);
+    return data.reduce((acc, cur) => {
+      acc[cur._id || 'unknown'] = cur.count;
+      return acc;
+    }, {});
+  }
+
   /**
    * Search resumes by text in name or summary fields
    * @param {string} query

@@ -16,7 +16,7 @@ function isEmail(email) {
  * E.164 phone validation
  */
 function isPhone(phone) {
-  return /^\+?[1-9]\d{1,14}$/.test(phone);
+  return /^\+?[1-9]\d{9,14}$/.test(phone);
 }
 
 module.exports = { isObjectId, isEmail, isPhone };

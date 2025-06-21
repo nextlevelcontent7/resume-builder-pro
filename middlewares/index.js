@@ -4,4 +4,7 @@ module.exports = {
   logger: require('./logger'),
   auth: require('./auth'),
   requestId: require('./requestId'),
+  userAuditLogger: require('./userAuditLogger'),
+  errorParser: require('./errorParser'),
+  checkUser: require('./auth/checkUser'),
 };
