@@ -1,10 +1,22 @@
+class FakeQuery {
+  constructor(result) {
+    this.result = result;
+  }
+  skip() { return this; }
+  limit() { return this; }
+  sort() { return this; }
+  then(res, rej) { return Promise.resolve(this.result).then(res, rej); }
+}
+
 class FakeModel {
   constructor(data) { Object.assign(this, data); }
   static async findOne() { return null; }
   static async findById() { return null; }
   static async create(data) { return new FakeModel(data); }
   static async countDocuments() { return 0; }
-  static async find() { return []; }
+  static find() { return new FakeQuery([]); }
+  static async findByIdAndUpdate(id, update, opts) { return new FakeModel(update); }
+  static async findByIdAndDelete() { return null; }
   save() { return Promise.resolve(this); }
 }
 class Schema {
