@@ -22,6 +22,11 @@ the `uploads/` directory. Each resume can be exported to PDF via
 `GET /api/resumes/:id/export`, which generates a file under the `exports/`
 folder and returns a download link.
 
+Additional endpoints include:
+- `POST /api/resumes/import` for bulk JSON import.
+- `GET /api/resumes/export/bulk` to download all resumes as a single ZIP.
+- `GET /api/resumes/:id/metadata` to fetch stored file metadata.
+
 ## Frontend
 
 The `frontend/` directory contains a Vite + React application with Tailwind CSS and i18n support. Run it with:

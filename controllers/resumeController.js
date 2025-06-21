@@ -215,6 +215,52 @@ async function exportResume(req, res) {
   }
 }
 
+/**
+ * Retrieve metadata about the uploaded resume file
+ */
+async function getMetadata(req, res) {
+  try {
+    const data = await resumeService.getMetadata(req.params.id);
+    if (!data) return res.status(404).json(error(req, 'resumeNotFound'));
+    return res.json(success(req, 'ok', data));
+  } catch (err) {
+    err.messageKey = 'metadataFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Import resumes in bulk from JSON array
+ */
+async function importResumes(req, res) {
+  try {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json(error(req, 'badRequest'));
+    }
+    const results = await resumeService.importMany(req.body);
+    return res.status(201).json(success(req, 'resumeCreated', results));
+  } catch (err) {
+    err.messageKey = 'importFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Export all resumes as a single ZIP archive
+ */
+async function exportBulk(req, res) {
+  try {
+    const locale = req.lang || 'en';
+    const pathZip = await resumeService.exportAll(locale);
+    const fileName = path.basename(pathZip);
+    const url = `/exports/${fileName}`;
+    return res.json(success(req, 'pdfGenerated', { url }));
+  } catch (err) {
+    err.messageKey = 'exportFailed';
+    return res.status(500).json(error(req, err.messageKey));
+  }
+}
+
 module.exports = {
   createResume,
   getResumeById,
@@ -226,4 +272,7 @@ module.exports = {
   duplicateResume,
   archiveResume,
   getAnalytics,
+  getMetadata,
+  importResumes,
+  exportBulk,
 };

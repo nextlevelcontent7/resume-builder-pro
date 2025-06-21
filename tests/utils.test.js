@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { stringUtils, dateUtils, printUtils, i18nUtils, validators } = require('../utils');
+const { stringUtils, dateUtils, printUtils, i18nUtils, validators, encryptionUtils } = require('../utils');
 
 function run() {
   assert.strictEqual(stringUtils.toSlug('Hello World'), 'hello-world');
@@ -17,6 +17,11 @@ function run() {
   assert.strictEqual(i18nUtils.getFallbackLocale('en-US'), 'en');
   const merged = i18nUtils.mergeLocales({ a: 1 }, { b: 2 });
   assert.deepStrictEqual(merged, { a: 1, b: 2 });
+
+  const secret = 'test';
+  const encrypted = encryptionUtils.encrypt('hello', secret);
+  const decrypted = encryptionUtils.decrypt(encrypted, secret);
+  assert.strictEqual(decrypted, 'hello');
 
   assert(validators.isURL('http://example.com'), 'Valid URL failed');
   assert(!validators.isURL('bad_url'), 'Invalid URL passed');

@@ -25,13 +25,15 @@ class AdminService {
     return Resume.findByIdAndUpdate(id, updates, { new: true }).lean();
   }
 
-  getLogs() {
+  getLogs(level) {
     const logDir = path.join(__dirname, '..', 'logs');
     const files = fs.readdirSync(logDir).filter((f) => f.endsWith('.log'));
-    const latest = files.sort().pop();
-    if (!latest) return [];
-    const content = fs.readFileSync(path.join(logDir, latest), 'utf8');
-    return content.trim().split('\n').slice(-100);
+    const target = files.sort().pop();
+    if (!target) return [];
+    const content = fs.readFileSync(path.join(logDir, target), 'utf8');
+    const lines = content.trim().split('\n');
+    if (!level) return lines.slice(-100);
+    return lines.filter((l) => l.includes(level.toUpperCase())).slice(-100);
   }
 
   getSettings() {
@@ -47,6 +49,10 @@ class AdminService {
     if (!(key in flags)) throw new Error('invalidFeature');
     toggle(key);
     return flags[key];
+  }
+
+  listFeatures() {
+    return { ...flags };
   }
 }
 

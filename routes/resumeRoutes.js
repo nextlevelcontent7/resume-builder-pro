@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { body, param, query } = require('express-validator');
 const upload = require('../middlewares/upload');
-const { auth, checkUser } = require('../middlewares');
+const { auth, checkUser, userAgent } = require('../middlewares');
 const {
   createResume,
   getResumeById,
@@ -13,8 +13,13 @@ const {
   duplicateResume,
   archiveResume,
   getAnalytics,
+  getMetadata,
+  importResumes,
+  exportBulk,
 } = require('../controllers/resumeController');
 const { validators } = require('../utils');
+
+router.use(userAgent);
 
 // Validators
 const idValidator = [
@@ -25,6 +30,9 @@ const listValidator = [
   query('page').optional().isInt({ min: 1 }).toInt(),
   query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
   query('status').optional().isString(),
+  query('theme').optional().isString(),
+  query('from').optional().isISO8601(),
+  query('to').optional().isISO8601(),
 ];
 
 const searchValidator = [
@@ -40,8 +48,17 @@ router.get('/', auth, listValidator, listResumes);
 // Search resumes
 router.get('/search', auth, searchValidator, searchResumes);
 
+// Bulk import resumes from JSON
+router.post('/import', auth, importResumes);
+
 // Export resume
 router.get('/:id/export', auth, idValidator, exportResume);
+
+// Bulk export all resumes
+router.get('/export/bulk', auth, exportBulk);
+
+// Get metadata for resume file
+router.get('/:id/metadata', auth, idValidator, getMetadata);
 
 // Get a resume by id
 router.get('/:id', auth, idValidator, getResumeById);

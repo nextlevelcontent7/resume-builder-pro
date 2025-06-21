@@ -122,4 +122,32 @@ async function generate(resume, locale = 'en', theme = 'default', format = 'pdf'
   return filePath;
 }
 
-module.exports = { generate };
+const archiver = require('archiver');
+
+/**
+ * Generate a ZIP archive containing multiple resumes
+ * @param {Array<Object>} resumes array of resume data
+ * @returns {Promise<string>} path to created zip
+ */
+async function generateBulk(resumes, locale = 'en', theme = 'default') {
+  const exportsDir = path.join(__dirname, '..', 'exports');
+  if (!fs.existsSync(exportsDir)) {
+    fs.mkdirSync(exportsDir);
+  }
+  const zipName = `resumes-${Date.now()}.zip`;
+  const zipPath = path.join(exportsDir, zipName);
+  const output = fs.createWriteStream(zipPath);
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  archive.pipe(output);
+
+  for (const data of resumes) {
+    const pdfPath = await generate(data, locale, theme, 'pdf');
+    const base = path.basename(pdfPath);
+    archive.file(pdfPath, { name: base });
+  }
+
+  await archive.finalize();
+  return zipPath;
+}
+
+module.exports = { generate, generateBulk };

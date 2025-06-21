@@ -9,5 +9,6 @@ module.exports = {
   rateLimiter: require('./rateLimiter'),
   checkUser: require('./auth/checkUser'),
   adminOnly: require('./adminOnly'),
+  userAgent: require('./userAgent'),
   swagger: require('./swagger'),
 };

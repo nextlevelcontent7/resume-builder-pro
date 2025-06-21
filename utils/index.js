@@ -8,4 +8,5 @@ module.exports = {
   validationUtils: require('./validationUtils'),
   printUtils: require('./printUtils'),
   i18nUtils: require('./i18nUtils'),
+  encryptionUtils: require('./encryptionUtils'),
 };

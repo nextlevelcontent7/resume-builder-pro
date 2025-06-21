@@ -10,6 +10,7 @@ const {
   getSettings,
   updateSettings,
   toggleFeature,
+  listFeatures,
 } = require('../controllers/adminController');
 
 router.use(auth, adminOnly);
@@ -21,6 +22,8 @@ router.get('/resumes', listResumes);
 router.put('/resumes/:id', param('id').isMongoId(), updateResume);
 
 router.get('/logs', viewLogs);
+
+router.get('/features', listFeatures);
 
 router.get('/settings', getSettings);
 router.post('/settings', updateSettings);

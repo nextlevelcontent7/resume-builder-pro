@@ -9,6 +9,7 @@ const {
   userAuditLogger,
   errorParser,
   rateLimiter,
+  userAgent,
   swagger,
 } = require('./middlewares');
 const path = require('path');
@@ -24,6 +25,9 @@ app.use(cors());
 
 // Attach request ID for traceability
 app.use(requestId);
+
+// Capture basic User-Agent information for analytics and security purposes
+app.use(userAgent);
 
 // Basic in-memory rate limiter to prevent abuse
 app.use(rateLimiter);

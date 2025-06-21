@@ -96,6 +96,36 @@ class ResumeService {
     if (!resume) return null;
     return Resume.duplicate(resume.toObject(), 'draft');
   }
+
+  /**
+   * Return basic file metadata for a given resume
+   * @param {string} id resume id
+   */
+  async getMetadata(id) {
+    const res = await Resume.findById(id, 'resumeFile updatedAt createdAt');
+    if (!res || !res.resumeFile) return null;
+    const { filename, mimetype, size } = res.resumeFile;
+    return { filename, mimetype, size, updatedAt: res.updatedAt, createdAt: res.createdAt };
+  }
+
+  /**
+   * Import multiple resumes from a JSON array
+   * @param {Array<Object>} list
+   * @returns {Promise<Array<Resume>>}
+   */
+  async importMany(list = []) {
+    if (!Array.isArray(list)) throw new Error('invalidData');
+    return Resume.insertMany(list);
+  }
+
+  /**
+   * Export all resumes in the system to a zip archive
+   * @returns {Promise<string>} path to zip file
+   */
+  async exportAll() {
+    const all = await Resume.find();
+    return pdfService.generateBulk(all.map(r => r.toObject()));
+  }
 }
 
 module.exports = new ResumeService();

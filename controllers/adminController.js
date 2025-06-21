@@ -41,11 +41,16 @@ async function updateResume(req, res) {
 
 async function viewLogs(req, res) {
   try {
-    const logs = await adminService.getLogs();
+    const logs = await adminService.getLogs(req.query.level);
     res.json(success(req, 'ok', logs));
   } catch (err) {
     res.status(500).json(error(req, 'fetchFailed', err.message));
   }
+}
+
+async function listFeatures(req, res) {
+  const list = adminService.listFeatures();
+  res.json(success(req, 'ok', list));
 }
 
 async function getSettings(req, res) {
@@ -76,4 +81,5 @@ module.exports = {
   getSettings,
   updateSettings,
   toggleFeature,
+  listFeatures,
 };
