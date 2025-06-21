@@ -1,5 +1,6 @@
 const Resume = require('../models/Resume');
 const pdfService = require('./pdfService');
+const { remoteSyncService } = require('./index');
 
 /**
  * Service layer encapsulating resume CRUD operations and export logic.
@@ -95,6 +96,45 @@ class ResumeService {
     const resume = await this.getById(id);
     if (!resume) return null;
     return Resume.duplicate(resume.toObject(), 'draft');
+  }
+
+  /**
+   * Create a version snapshot for a resume. Useful for audit history
+   * or undo functionality. Only stores a limited set of fields by
+   * default to avoid large document growth.
+   */
+  async createVersion(resumeId, comment = '') {
+    const resume = await this.getById(resumeId);
+    if (!resume) return null;
+    const snapshot = {
+      createdAt: new Date(),
+      comment,
+      data: resume.toObject(),
+    };
+    await Resume.findByIdAndUpdate(resumeId, {
+      $push: { versions: snapshot },
+    });
+    return snapshot;
+  }
+
+  /**
+   * Synchronize the given resume with a remote endpoint. The resume
+   * is first converted into a public representation and then pushed
+   * using the remoteSyncService. If successful the remote ID is stored
+   * in the resume metadata for easy lookup.
+   */
+  async syncRemote(resumeId) {
+    const resume = await this.getById(resumeId);
+    if (!resume) return null;
+    const publicData = resume.toPublic();
+    const remoteId = await remoteSyncService.pushResume(publicData);
+    if (remoteId) {
+      await Resume.findByIdAndUpdate(resumeId, {
+        'settings.remoteId': remoteId,
+        'settings.lastSynced': new Date(),
+      });
+    }
+    return remoteId;
   }
 
   /**

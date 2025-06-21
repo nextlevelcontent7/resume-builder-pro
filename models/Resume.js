@@ -399,6 +399,21 @@ const ResumeSchema = new Schema(
     // Original uploaded resume file if the user imported one.
     resumeFile: FileInfoSchema,
 
+    // Historical versions for audit and change tracking
+    versions: {
+      type: [
+        new Schema(
+          {
+            createdAt: { type: Date, default: Date.now },
+            comment: { type: String, trim: true },
+            data: { type: Schema.Types.Mixed, required: true },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
+
     // Reference to the owning user
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -981,6 +996,7 @@ ResumeSchema.statics.duplicateResume = async function (resumeId, status = 'draft
   obj.slug = await buildUniqueSlug(original);
   obj.settings.status = status;
   delete obj.resumeFile; // do not duplicate large file data
+  delete obj.versions; // new resume should start without version history
   return this.create(obj);
 };
 

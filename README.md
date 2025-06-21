@@ -15,6 +15,7 @@ npm run dev   # start in development mode with nodemon
 ```
 
 Environment variables are documented in `.env.example`.
+The file now includes `SYNC_ENDPOINT` for optional remote backup.
 
 The API exposes basic resume CRUD endpoints under `/api/resumes` for creating,
 updating and deleting user resumes. Uploaded images and PDF files are stored in
@@ -26,6 +27,7 @@ Additional endpoints include:
 - `POST /api/resumes/import` for bulk JSON import.
 - `GET /api/resumes/export/bulk` to download all resumes as a single ZIP.
 - `GET /api/resumes/:id/metadata` to fetch stored file metadata.
+- `GET /api/health` simple health check for load balancers.
 
 ## Frontend
 
