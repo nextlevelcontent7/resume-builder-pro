@@ -9,4 +9,7 @@ module.exports = {
   printUtils: require('./printUtils'),
   i18nUtils: require('./i18nUtils'),
   encryptionUtils: require('./encryptionUtils'),
+  jwt: require('./jwt'),
+  mailer: require('./mailer'),
+  slugify: require('./slugify'),
 };

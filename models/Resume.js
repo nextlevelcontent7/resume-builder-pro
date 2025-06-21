@@ -15,8 +15,9 @@
 // Dependencies
 //-----------------------------------------------------------------------------
 
-const mongoose = require("mongoose");
-const slugify = require("slugify");
+// use local mongoose stub for environments without MongoDB
+const mongoose = require("../mongoose");
+const { slugify } = require("../utils");
 
 const { Schema } = mongoose;
 

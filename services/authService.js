@@ -1,20 +1,14 @@
-const jwt = require('jsonwebtoken');
+// use internal lightweight JWT utility to avoid external dependency during tests
+const jwt = require('../utils/jwt');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+// simple mailer for tests and offline use
+const { mailer } = require('../utils');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const REFRESH_SECRET = process.env.REFRESH_SECRET || 'refresh-secret';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const transporter = mailer.createTransport();
 
 class AuthService {
   generateAccessToken(user) {

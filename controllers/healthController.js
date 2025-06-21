@@ -1,5 +1,5 @@
 const { success } = require('../utils/formatResponse');
-const mongoose = require('mongoose');
+const mongoose = require('../mongoose');
 
 /**
  * Basic health check returning database status and uptime. Useful for
