@@ -17,4 +17,16 @@ function getExtension(file) {
   return path.extname(file).replace('.', '').toLowerCase();
 }
 
-module.exports = { ensureDir, removeFile, getExtension };
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+function writeJson(file, data) {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+function copy(src, dest) {
+  fs.copyFileSync(src, dest);
+}
+
+module.exports = { ensureDir, removeFile, getExtension, readJson, writeJson, copy };

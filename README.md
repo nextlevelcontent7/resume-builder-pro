@@ -33,3 +33,18 @@ npm run dev  # start development server on http://localhost:3000
 ```
 
 The app provides a resume form with preview/export features and supports both English and Arabic languages with RTL layout.
+
+## Docker
+
+To run the API and MongoDB using Docker:
+
+```bash
+docker-compose up --build
+```
+
+This will start MongoDB and the API container on port `5000`.
+
+## API Docs
+
+A Swagger specification is available under `docs/swagger.yaml` which can be
+served using tools like `swagger-ui`. The API base path is `/api`.

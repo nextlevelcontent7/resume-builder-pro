@@ -1,12 +1,14 @@
 const assert = require('assert');
-const { stringUtils, dateUtils, printUtils, i18nUtils } = require('../utils');
+const { stringUtils, dateUtils, printUtils, i18nUtils, validators } = require('../utils');
 
 function run() {
   assert.strictEqual(stringUtils.toSlug('Hello World'), 'hello-world');
   assert.strictEqual(stringUtils.truncate('abcd', 3), '...');
+  assert.strictEqual(stringUtils.camelCase('hello world'), 'helloWorld');
 
   const date = new Date('2020-01-01');
   assert.strictEqual(dateUtils.addDays(date, 1).getDate(), 2);
+  assert.strictEqual(dateUtils.diffInDays('2020-01-01', '2020-01-05'), 4);
 
   const formatted = printUtils.paginate('a\nb\nc\nd', 2);
   assert.deepStrictEqual(formatted, ['a\nb', 'c\nd']);
@@ -16,6 +18,8 @@ function run() {
   const merged = i18nUtils.mergeLocales({ a: 1 }, { b: 2 });
   assert.deepStrictEqual(merged, { a: 1, b: 2 });
 
+  assert(validators.isURL('http://example.com'), 'Valid URL failed');
+  assert(!validators.isURL('bad_url'), 'Invalid URL passed');
   console.log('utils tests passed');
 }
 

@@ -9,6 +9,7 @@ const {
   userAuditLogger,
   errorParser,
   rateLimiter,
+  swagger,
 } = require('./middlewares');
 const path = require('path');
 const i18n = require('./utils/i18n');
@@ -44,6 +45,7 @@ const baseRoutes = require('./routes');
 const resumeRoutes = require('./routes/resumeRoutes');
 app.use('/api', baseRoutes);
 app.use('/api/resumes', resumeRoutes);
+app.get('/api-docs', swagger);
 
 // Handle 404 errors
 

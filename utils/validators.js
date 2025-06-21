@@ -19,4 +19,8 @@ function isPhone(phone) {
   return /^\+?[1-9]\d{9,14}$/.test(phone);
 }
 
-module.exports = { isObjectId, isEmail, isPhone };
+function isURL(url) {
+  try { new URL(url); return true; } catch { return false; }
+}
+
+module.exports = { isObjectId, isEmail, isPhone, isURL };

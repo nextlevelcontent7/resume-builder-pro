@@ -6,4 +6,12 @@ function isPositiveInteger(val) {
   return Number.isInteger(val) && val > 0;
 }
 
-module.exports = { isNonEmptyString, isPositiveInteger };
+function isBoolean(val) {
+  return typeof val === 'boolean';
+}
+
+function isDate(val) {
+  return !isNaN(Date.parse(val));
+}
+
+module.exports = { isNonEmptyString, isPositiveInteger, isBoolean, isDate };

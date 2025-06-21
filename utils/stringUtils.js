@@ -12,4 +12,17 @@ function truncate(str, len) {
   return str.slice(0, len - 3) + '...';
 }
 
-module.exports = { toSlug, truncate };
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function camelCase(str) {
+  return str
+    .toLowerCase()
+    .split(/[^a-z0-9]/)
+    .filter(Boolean)
+    .map((word, i) => (i === 0 ? word : capitalize(word)))
+    .join('');
+}
+
+module.exports = { toSlug, truncate, capitalize, camelCase };
