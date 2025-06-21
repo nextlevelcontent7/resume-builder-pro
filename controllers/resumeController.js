@@ -1,9 +1,10 @@
-const Resume = require('../models/Resume');
 const { success, error } = require('../utils/formatResponse');
-const pdfService = require('../services/pdfService');
+const { resumeService } = require('../services');
 const path = require('path');
 
-// Create a new resume document
+/**
+ * Create a new resume document and return created record.
+ */
 async function createResume(req, res) {
   try {
     const data = req.body;
@@ -29,7 +30,7 @@ async function createResume(req, res) {
       };
     }
 
-    const resume = await Resume.create(data);
+    const resume = await resumeService.create(data);
     return res.status(201).json(success(req, 'resumeCreated', resume));
   } catch (err) {
     err.messageKey = 'createFailed';
@@ -37,10 +38,57 @@ async function createResume(req, res) {
   }
 }
 
-// Retrieve a resume by ID
+/**
+ * List resumes with pagination and optional status filter
+ */
+async function listResumes(req, res) {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const result = await resumeService.list({ page, limit, status });
+    return res.json(success(req, 'ok', result));
+  } catch (err) {
+    err.messageKey = 'listFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Search resumes by text query
+ */
+async function searchResumes(req, res) {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json(error(req, 'badRequest'));
+    }
+    const results = await resumeService.search(q);
+    return res.json(success(req, 'ok', results));
+  } catch (err) {
+    err.messageKey = 'searchFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Duplicate an existing resume as a draft
+ */
+async function duplicateResume(req, res) {
+  try {
+    const dup = await resumeService.duplicate(req.params.id);
+    if (!dup) return res.status(404).json(error(req, 'resumeNotFound'));
+    return res.status(201).json(success(req, 'resumeCreated', dup));
+  } catch (err) {
+    err.messageKey = 'duplicateFailed';
+    return res.status(400).json(error(req, err.messageKey));
+  }
+}
+
+/**
+ * Retrieve a resume by its ID.
+ */
 async function getResumeById(req, res) {
   try {
-    const resume = await Resume.findById(req.params.id);
+    const resume = await resumeService.getById(req.params.id);
     if (!resume) {
       return res.status(404).json(error(req, 'resumeNotFound'));
     }
@@ -51,7 +99,9 @@ async function getResumeById(req, res) {
   }
 }
 
-// Update an existing resume
+/**
+ * Update an existing resume by ID.
+ */
 async function updateResume(req, res) {
   try {
     const updates = req.body;
@@ -76,7 +126,7 @@ async function updateResume(req, res) {
       };
     }
 
-    const resume = await Resume.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    const resume = await resumeService.update(req.params.id, updates);
     if (!resume) {
       return res.status(404).json(error(req, 'resumeNotFound'));
     }
@@ -87,10 +137,12 @@ async function updateResume(req, res) {
   }
 }
 
-// Delete a resume by ID
+/**
+ * Delete a resume by its ID.
+ */
 async function deleteResume(req, res) {
   try {
-    const resume = await Resume.findByIdAndDelete(req.params.id);
+    const resume = await resumeService.remove(req.params.id);
     if (!resume) {
       return res.status(404).json(error(req, 'resumeNotFound'));
     }
@@ -101,16 +153,19 @@ async function deleteResume(req, res) {
   }
 }
 
-// Export resume as PDF and return download link
-async function exportResumeAsPDF(req, res) {
+/**
+ * Export resume as PDF/PNG and return download link.
+ */
+async function exportResume(req, res) {
   try {
-    const resume = await Resume.findById(req.params.id);
+    const resume = await resumeService.getById(req.params.id);
     if (!resume) {
       return res.status(404).json(error(req, 'resumeNotFound'));
     }
 
     const locale = req.lang || 'en';
-    const filePath = await pdfService.generate(resume.toObject(), locale, resume.theme);
+    const format = req.query.format || 'pdf';
+    const filePath = await resumeService.export(resume, locale, format);
     const fileName = path.basename(filePath);
     const url = `/exports/${fileName}`;
     return res.json(success(req, 'pdfGenerated', { url }));
@@ -125,5 +180,8 @@ module.exports = {
   getResumeById,
   updateResume,
   deleteResume,
-  exportResumeAsPDF,
+  exportResume,
+  listResumes,
+  searchResumes,
+  duplicateResume,
 };

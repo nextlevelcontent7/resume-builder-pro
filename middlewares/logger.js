@@ -6,10 +6,7 @@ const path = require('path');
 // Setup winston logger with daily rotating log files
 const logger = createLogger({
   level: 'info',
-  format: format.combine(
-    format.timestamp(),
-    format.json()
-  ),
+  format: format.combine(format.timestamp(), format.json()),
   transports: [
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
@@ -22,11 +19,23 @@ const logger = createLogger({
   ],
 });
 
-// Morgan middleware to stream logs through winston
-const morganMiddleware = morgan('combined', {
-  stream: {
-    write: (message) => logger.info(message.trim()),
-  },
+// Morgan token to include request ID
+morgan.token('id', (req) => req.id || '-');
+morgan.token('user', (req) => (req.user ? req.user.id : 'anon'));
+morgan.token('body', (req) => {
+  const safe = { ...req.body };
+  if (safe.password) safe.password = '***';
+  return JSON.stringify(safe);
 });
+
+// Morgan middleware to stream logs through winston
+const morganMiddleware = morgan(
+  ':id :user :method :url :status :response-time ms :body',
+  {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  }
+);
 
 module.exports = { logger, morganMiddleware };

@@ -1,7 +1,7 @@
 // Express application setup with common middleware
 const express = require('express');
 const cors = require('cors');
-const { notFound, errorHandler, logger } = require('./middlewares');
+const { notFound, errorHandler, logger, requestId } = require('./middlewares');
 const path = require('path');
 const i18n = require('./utils/i18n');
 
@@ -12,6 +12,9 @@ app.use(express.json());
 
 // Enable CORS for all origins (configure as needed for production)
 app.use(cors());
+
+// Attach request ID for traceability
+app.use(requestId);
 
 // Request logging
 app.use(logger.morganMiddleware);

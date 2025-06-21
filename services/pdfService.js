@@ -2,18 +2,27 @@ const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
 const pdf = require('html-pdf');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const puppeteer = require('puppeteer');
 
-// Format date ranges in a locale-aware manner
+/**
+ * Format a date range using the provided locale.
+ */
 function formatDateRange(start, end, locale) {
   const opts = { year: 'numeric', month: 'short' };
   const startStr = new Date(start).toLocaleDateString(locale, opts);
-  const endStr = end ? new Date(end).toLocaleDateString(locale, opts) :
-    (locale.startsWith('ar') ? 'الآن' : 'Present');
+  const endStr = end
+    ? new Date(end).toLocaleDateString(locale, opts)
+    : locale.startsWith('ar')
+      ? 'الآن'
+      : 'Present';
   return `${startStr} - ${endStr}`;
 }
 
-// Generate a PDF from resume data and chosen template
-async function generate(resume, locale = 'en', theme = 'default') {
+/**
+ * Internal helper to compile a template and return HTML.
+ */
+function renderHtml(resume, locale, theme) {
   const templateName = `${theme}_${locale}.hbs`;
   const templatePath = path.join(__dirname, '..', 'templates', templateName);
   if (!fs.existsSync(templatePath)) {
@@ -29,26 +38,74 @@ async function generate(resume, locale = 'en', theme = 'default') {
   const source = fs.readFileSync(templatePath, 'utf8');
   const template = handlebars.compile(source);
 
-  const html = template({
+  return template({
     resume,
     t: (key) => dict[key] || key,
     formatDateRange: (s, e) => formatDateRange(s, e, locale),
   });
+}
+
+/**
+ * Generate resume export in desired format.
+ * Supported formats: pdf (default) and png.
+ */
+async function generate(resume, locale = 'en', theme = 'default', format = 'pdf') {
+  const html = renderHtml(resume, locale, theme);
 
   const exportsDir = path.join(__dirname, '..', 'exports');
   if (!fs.existsSync(exportsDir)) {
     fs.mkdirSync(exportsDir);
   }
 
-  const filename = `resume-${resume._id}-${Date.now()}.pdf`;
+  const filename = `resume-${resume._id}-${Date.now()}.${format}`;
   const filePath = path.join(exportsDir, filename);
 
-  return new Promise((resolve, reject) => {
-    pdf.create(html).toFile(filePath, (err) => {
+  // generate base PDF using html-pdf for reliable layout
+  const basePdf = await new Promise((resolve, reject) => {
+    pdf.create(html, { format: 'A4', border: '10mm' }).toBuffer((err, buffer) => {
       if (err) return reject(err);
-      resolve(filePath);
+      resolve(buffer);
     });
   });
+
+  // Use pdf-lib for post processing such as watermarking and metadata
+  const doc = await PDFDocument.load(basePdf);
+  doc.setTitle('Resume');
+  doc.setCreator('Resume Builder Pro');
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  doc.getPages().forEach((page) => {
+    const { width } = page.getSize();
+    page.drawText('Resume Builder Pro', {
+      x: width / 2 - 60,
+      y: 20,
+      font,
+      size: 10,
+      color: rgb(0.75, 0.75, 0.75),
+      opacity: 0.5,
+    });
+  });
+  const pdfBuffer = await doc.save();
+
+  if (format === 'pdf') {
+    await fs.promises.writeFile(filePath, pdfBuffer);
+    return filePath;
+  }
+
+  // convert to PNG using puppeteer for high quality rendering
+  const tmpPath = filePath.replace(/\.png$/, '.pdf');
+  await fs.promises.writeFile(tmpPath, pdfBuffer);
+
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`file://${tmpPath}`, { waitUntil: 'networkidle0' });
+    await page.screenshot({ path: filePath, fullPage: true });
+  } finally {
+    await browser.close();
+    fs.unlinkSync(tmpPath);
+  }
+
+  return filePath;
 }
 
 module.exports = { generate };
