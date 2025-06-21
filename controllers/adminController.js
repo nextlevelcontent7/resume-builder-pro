@@ -72,6 +72,15 @@ async function toggleFeature(req, res) {
   }
 }
 
+async function analytics(req, res) {
+  try {
+    const stats = await adminService.usageStats();
+    res.json(success(req, 'ok', stats));
+  } catch (err) {
+    res.status(500).json(error(req, 'fetchFailed', err.message));
+  }
+}
+
 module.exports = {
   listUsers,
   updateUser,
@@ -82,4 +91,5 @@ module.exports = {
   updateSettings,
   toggleFeature,
   listFeatures,
+  analytics,
 };

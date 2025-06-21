@@ -1,20 +1,20 @@
 /**
- * Simple authentication middleware for demonstration.
- * Checks for Authorization header `Bearer demo-token` or `Bearer admin-token`.
+ * JWT authentication middleware. Attaches user id and role from token payload.
  */
+const jwt = require('jsonwebtoken');
+
 module.exports = function auth(req, res, next) {
-  const auth = req.headers.authorization || '';
-  if (!auth.startsWith('Bearer ')) {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
 
-  const token = auth.slice(7);
-  // In real app verify JWT or session token here
-  if (token !== 'demo-token' && token !== 'admin-token') {
+  const token = header.slice(7);
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: payload.id, role: payload.role };
+    next();
+  } catch (err) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
-
-  const role = token === 'admin-token' ? 'admin' : 'user';
-  req.user = { id: role === 'admin' ? 'adminUser' : 'demoUser', role };
-  next();
 };

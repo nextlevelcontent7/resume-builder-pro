@@ -118,6 +118,26 @@ class ResumeService {
   }
 
   /**
+   * Retrieve version history for a resume
+   */
+  async getVersions(resumeId) {
+    const resume = await Resume.findById(resumeId, 'versions');
+    return resume ? resume.versions : [];
+  }
+
+  /**
+   * Rollback a resume to a given version snapshot
+   */
+  async rollback(resumeId, versionId) {
+    const resume = await Resume.findById(resumeId);
+    if (!resume) return null;
+    const version = resume.versions.id(versionId);
+    if (!version) return null;
+    resume.overwrite(version.data);
+    return resume.save();
+  }
+
+  /**
    * Synchronize the given resume with a remote endpoint. The resume
    * is first converted into a public representation and then pushed
    * using the remoteSyncService. If successful the remote ID is stored

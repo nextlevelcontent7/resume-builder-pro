@@ -54,6 +54,14 @@ class AdminService {
   listFeatures() {
     return { ...flags };
   }
+
+  async usageStats() {
+    const resumeCount = await Resume.countDocuments();
+    const userCount = await User.countDocuments();
+    const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const newResumes = await Resume.countDocuments({ createdAt: { $gte: lastWeek } });
+    return { resumeCount, userCount, newResumes };
+  }
 }
 
 module.exports = new AdminService();

@@ -59,3 +59,6 @@ This will start MongoDB and the API container on port `5000`.
 
 A Swagger specification is available under `docs/swagger.yaml` which can be
 served using tools like `swagger-ui`. The API base path is `/api`.
+
+The environment example also documents `REFRESH_SECRET`, `EMAIL_USER`, and `EMAIL_PASS` for login sessions and email verification support.
+\nThe API now provides authentication endpoints under `/api/auth` for user registration, login, token refresh, and password resets. Admin endpoints expose analytics via `/api/admin/analytics`. Resumes support version history and remote restore via `/api/resumes/restore/:remoteId`.

@@ -11,6 +11,7 @@ const {
   updateSettings,
   toggleFeature,
   listFeatures,
+  analytics,
 } = require('../controllers/adminController');
 
 router.use(auth, adminOnly);
@@ -28,5 +29,7 @@ router.get('/features', listFeatures);
 router.get('/settings', getSettings);
 router.post('/settings', updateSettings);
 router.post('/features/:key/toggle', toggleFeature);
+
+router.get('/analytics', analytics);
 
 module.exports = router;

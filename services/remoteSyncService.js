@@ -80,6 +80,19 @@ class RemoteSyncService {
       return [];
     }
   }
+
+  /**
+   * Restore a resume from the remote API
+   * @param {string} id remote resume id
+   */
+  async restoreResume(id) {
+    try {
+      return await this.request('GET', `/resumes/${id}`);
+    } catch (err) {
+      console.error('Failed to restore resume', err.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new RemoteSyncService();

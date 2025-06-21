@@ -261,6 +261,36 @@ async function exportBulk(req, res) {
   }
 }
 
+async function listVersions(req, res) {
+  try {
+    const list = await resumeService.getVersions(req.params.id);
+    res.json(success(req, 'ok', list));
+  } catch (err) {
+    res.status(400).json(error(req, err.message));
+  }
+}
+
+async function rollbackVersion(req, res) {
+  try {
+    const resume = await resumeService.rollback(req.params.id, req.params.versionId);
+    if (!resume) return res.status(404).json(error(req, 'notFound'));
+    res.json(success(req, 'updated', resume));
+  } catch (err) {
+    res.status(400).json(error(req, err.message));
+  }
+}
+
+async function restoreRemote(req, res) {
+  try {
+    const data = await remoteSyncService.restoreResume(req.params.remoteId);
+    if (!data) return res.status(404).json(error(req, 'notFound'));
+    const resume = await resumeService.create(data);
+    res.json(success(req, 'restored', resume));
+  } catch (err) {
+    res.status(400).json(error(req, err.message));
+  }
+}
+
 module.exports = {
   createResume,
   getResumeById,
@@ -275,4 +305,7 @@ module.exports = {
   getMetadata,
   importResumes,
   exportBulk,
+  listVersions,
+  rollbackVersion,
+  restoreRemote,
 };

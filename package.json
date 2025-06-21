@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "test": "node tests/index.js",
-    "docker": "docker-compose up --build"
+    "docker": "docker-compose up --build",
+    "build": "echo building",
+    "lint": "echo linting"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +27,9 @@
     "html-pdf": "^3.0.1",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^21.3.8",
-    "archiver": "^5.3.1"
+    "archiver": "^5.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.11"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

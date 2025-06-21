@@ -16,6 +16,9 @@ const {
   getMetadata,
   importResumes,
   exportBulk,
+  listVersions,
+  rollbackVersion,
+  restoreRemote,
 } = require('../controllers/resumeController');
 const { validators } = require('../utils');
 
@@ -71,6 +74,13 @@ router.post('/:id/duplicate', auth, checkUser, idValidator, duplicateResume);
 
 // Archive resume
 router.post('/:id/archive', auth, checkUser, idValidator, archiveResume);
+
+// Version history
+router.get('/:id/versions', auth, idValidator, listVersions);
+router.post('/:id/rollback/:versionId', auth, checkUser, idValidator, rollbackVersion);
+
+// Restore resume from remote backup
+router.post('/restore/:remoteId', auth, restoreRemote);
 
 // Analytics
 router.get('/analytics/summary', auth, getAnalytics);
