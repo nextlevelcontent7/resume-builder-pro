@@ -12,11 +12,29 @@ const url = require('url');
 class RemoteSyncService {
   constructor(endpoint = process.env.SYNC_ENDPOINT) {
     this.endpoint = endpoint;
+    this.pending = [];
+    this.flushing = false;
   }
 
   setEndpoint(endpoint) {
     this.endpoint = endpoint;
   }
+
+  queueResume(resume) {
+    this.pending.push(resume);
+    if (!this.flushing) this.flush();
+  }
+
+  async flush() {
+    if (this.flushing) return;
+    this.flushing = true;
+    while (this.pending.length) {
+      const item = this.pending.shift();
+      await this.pushResume(item);
+    }
+    this.flushing = false;
+  }
+
 
   /**
    * Helper to perform an HTTP request and return the parsed JSON response.
