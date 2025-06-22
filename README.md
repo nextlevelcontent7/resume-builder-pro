@@ -61,4 +61,5 @@ A Swagger specification is available under `docs/swagger.yaml` which can be
 served using tools like `swagger-ui`. The API base path is `/api`.
 
 The environment example also documents `REFRESH_SECRET`, `EMAIL_USER`, and `EMAIL_PASS` for login sessions and email verification support.
+Additional rate-limiting controls can be tuned with `RATE_EXCLUDE_PATHS` and `RATE_WHITELIST_IPS` while `LOG_REMOTE_URL` allows forwarding logs to an external endpoint. `CSP` configures the Content-Security-Policy header. Admin access can be overridden via `ADMIN_OVERRIDE_HEADER` and `ADMIN_OVERRIDE_TOKEN` for trusted proxies.
 \nThe API now provides authentication endpoints under `/api/auth` for user registration, login, token refresh, and password resets. Admin endpoints expose analytics via `/api/admin/analytics`. Resumes support version history and remote restore via `/api/resumes/restore/:remoteId`.

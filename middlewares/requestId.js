@@ -5,7 +5,7 @@ const { v4: uuid } = require('uuid');
 const HEADER = process.env.REQUEST_ID_HEADER || 'X-Request-Id';
 
 module.exports = function requestId(req, res, next) {
-  req.id = uuid();
+  req.id = req.headers[HEADER.toLowerCase()] || uuid();
   res.setHeader(HEADER, req.id);
   next();
 };

@@ -14,6 +14,7 @@ module.exports = function userAuditLogger(req, res, next) {
       ip: ipHash,
       method: req.method,
       url: req.originalUrl,
+      roles: req.user ? req.user.roles || req.user.role : [],
       status: res.statusCode,
       ms: duration,
       id: req.id,

@@ -10,6 +10,12 @@ module.exports = function errorParser(err, req, res, next) {
   } else if (err.name === 'CastError') {
     err.status = 400;
     err.messageKey = 'invalidId';
+  } else if (err.name === 'JsonWebTokenError') {
+    err.status = 401;
+    err.messageKey = 'invalidToken';
+  } else if (err.name === 'TokenExpiredError') {
+    err.status = 401;
+    err.messageKey = 'tokenExpired';
   }
   next(err);
 };

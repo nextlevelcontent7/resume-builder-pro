@@ -17,6 +17,7 @@ module.exports = function userAgent(req, res, next) {
     : /firefox/i.test(ua)
     ? 'firefox'
     : 'unknown';
-  req.userAgent = { source: ua, mobile, os, browser };
+  const device = mobile ? 'mobile' : /tablet/i.test(ua) ? 'tablet' : 'desktop';
+  req.userAgent = { source: ua, mobile, os, browser, device };
   next();
 };

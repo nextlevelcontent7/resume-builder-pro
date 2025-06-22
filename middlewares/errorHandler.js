@@ -3,7 +3,7 @@ const { logger } = require('./logger');
 const { error } = require('../utils/formatResponse');
 
 module.exports = (err, req, res, next) => {
-  logger.error(err.stack || err.message);
+  logger.error(err.stack || err.message, { id: req.id });
 
   const status = err.status || 500;
   const messageKey = err.messageKey || 'serverError';

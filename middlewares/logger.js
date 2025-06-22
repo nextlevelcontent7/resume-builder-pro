@@ -5,6 +5,20 @@ const path = require('path');
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 const LOG_DIR = process.env.LOG_DIR || 'logs';
+const LOG_REMOTE_URL = process.env.LOG_REMOTE_URL;
+
+async function sendRemoteLog(payload) {
+  if (!LOG_REMOTE_URL) return;
+  try {
+    await fetch(LOG_REMOTE_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    // ignore remote log failures
+  }
+}
 
 // Build log format including request ID and user agent when available
 const logFormat = format.printf(({ timestamp, level, message, meta }) => {
@@ -29,6 +43,15 @@ const logger = createLogger({
   ],
 });
 
+['info', 'warn', 'error'].forEach((level) => {
+  const orig = logger[level].bind(logger);
+  logger[level] = (msg, meta) => {
+    const payload = { level, msg, meta, timestamp: new Date().toISOString() };
+    sendRemoteLog(payload);
+    orig(msg, meta);
+  };
+});
+
 // Morgan token to include request ID
 morgan.token('id', (req) => req.id || '-');
 morgan.token('user', (req) => (req.user ? req.user.id : 'anon'));
@@ -44,7 +67,11 @@ const morganMiddleware = morgan(
   ':id :user :agent :method :url :status :response-time ms :body',
   {
     stream: {
-      write: (message) => logger.info(message.trim()),
+      write: (message) => {
+        const msg = message.trim();
+        logger.info(msg);
+        sendRemoteLog({ level: 'info', msg });
+      },
     },
   }
 );
