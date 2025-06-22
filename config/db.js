@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../mongoose');
 
 // MongoDB connection with retry logic for robustness
 // Reads connection details from environment variables

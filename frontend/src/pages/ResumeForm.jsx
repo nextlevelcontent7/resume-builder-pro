@@ -8,8 +8,8 @@ const emptyExp = { jobTitle: '', company: '', startDate: '', endDate: '', descri
 export default function ResumeForm() {
   const { t } = useTranslation();
   const [personal, setPersonal] = useState({ name: '', email: '', phone: '', birthDate: '', location: '', nationality: '' });
-  const [education, setEducation] = useState([ { ...emptyEdu } ]);
-  const [experience, setExperience] = useState([ { ...emptyExp } ]);
+  const [education, setEducation] = useState([{ ...emptyEdu }]);
+  const [experience, setExperience] = useState([{ ...emptyExp }]);
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState('');
   const [languages, setLanguages] = useState([]);
@@ -57,9 +57,21 @@ export default function ResumeForm() {
   };
   const removeLanguage = (i) => setLanguages(languages.filter((_, idx) => idx !== i));
 
+  const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!personal.name.trim() || !emailRegex.test(personal.email)) return false;
+    if (personal.phone && !phoneRegex.test(personal.phone)) return false;
+    return true;
+  };
+
   const handleSubmit = async () => {
     setError('');
     setDownloadLink('');
+    if (!validateForm()) {
+      setError(t('error'));
+      return;
+    }
     try {
       const data = {
         personalInfo: personal,
@@ -89,8 +101,8 @@ export default function ResumeForm() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input name="name" value={personal.name} onChange={handlePersonalChange} placeholder={t('name')} className="border p-2" />
-        <input name="email" value={personal.email} onChange={handlePersonalChange} placeholder={t('email')} className="border p-2" />
+        <input name="name" value={personal.name} onChange={handlePersonalChange} placeholder={t('name')} className="border p-2" required />
+        <input name="email" value={personal.email} onChange={handlePersonalChange} placeholder={t('email')} className="border p-2" type="email" required />
         <input name="phone" value={personal.phone} onChange={handlePersonalChange} placeholder={t('phone')} className="border p-2" />
         <input type="date" name="birthDate" value={personal.birthDate} onChange={handlePersonalChange} className="border p-2" />
         <input name="location" value={personal.location} onChange={handlePersonalChange} placeholder={t('location')} className="border p-2" />
@@ -106,7 +118,9 @@ export default function ResumeForm() {
             <input name="school" value={edu.school} onChange={(e) => handleEducationChange(i, e)} placeholder={t('school')} className="border p-2" />
             <input type="date" name="startDate" value={edu.startDate} onChange={(e) => handleEducationChange(i, e)} className="border p-2" />
             <input type="date" name="endDate" value={edu.endDate} onChange={(e) => handleEducationChange(i, e)} className="border p-2" />
-            <button onClick={() => removeEducation(i)} className="text-red-500">{t('remove')}</button>
+            <button onClick={() => removeEducation(i)} className="text-red-500" title={t('remove')}>
+              {t('remove')}
+            </button>
           </div>
         ))}
         <button onClick={addEducation} className="mt-2 px-2 py-1 border">{t('addEducation')}</button>
@@ -121,7 +135,7 @@ export default function ResumeForm() {
             <input type="date" name="startDate" value={exp.startDate} onChange={(e) => handleExperienceChange(i, e)} className="border p-2" />
             <input type="date" name="endDate" value={exp.endDate} onChange={(e) => handleExperienceChange(i, e)} className="border p-2" />
             <textarea name="description" value={exp.description} onChange={(e) => handleExperienceChange(i, e)} placeholder={t('description')} className="border p-2 md:col-span-4" />
-            <button onClick={() => removeExperience(i)} className="text-red-500">{t('remove')}</button>
+            <button onClick={() => removeExperience(i)} className="text-red-500" title={t('remove')}>{t('remove')}</button>
           </div>
         ))}
         <button onClick={addExperience} className="mt-2 px-2 py-1 border">{t('addExperience')}</button>
@@ -131,11 +145,11 @@ export default function ResumeForm() {
         <h2 className="font-bold mb-2">{t('skills')}</h2>
         <div className="flex space-x-2 mb-2">
           <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} className="border p-2 flex-grow" />
-          <button onClick={addSkill} className="px-2 py-1 border">+</button>
+          <button onClick={addSkill} className="px-2 py-1 border" title={t('add')}>+</button>
         </div>
         <div className="flex flex-wrap gap-2">
           {skills.map((skill, i) => (
-            <span key={i} className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+            <span key={i} className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded" title={skill}>
               {skill} <button onClick={() => removeSkill(i)} className="ml-1 text-red-500">x</button>
             </span>
           ))}
@@ -147,7 +161,7 @@ export default function ResumeForm() {
         <div className="flex space-x-2 mb-2">
           <input value={languageInput.language} onChange={(e) => setLanguageInput({ ...languageInput, language: e.target.value })} placeholder={t('language')} className="border p-2" />
           <input value={languageInput.level} onChange={(e) => setLanguageInput({ ...languageInput, level: e.target.value })} placeholder={t('level')} className="border p-2" />
-          <button onClick={addLanguage} className="px-2 py-1 border">+</button>
+          <button onClick={addLanguage} className="px-2 py-1 border" title={t('add')}>+</button>
         </div>
         <div className="flex flex-wrap gap-2">
           {languages.map((lng, i) => (
