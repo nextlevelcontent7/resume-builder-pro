@@ -1,0 +1,10 @@
+<header class="text-center py-4 border-b mb-4">
+  <h1 class="text-3xl font-bold">{{name}}</h1>
+  {{#if title}}
+  <p class="italic">{{title}}</p>
+  {{/if}}
+  {{#if contact}}
+  <p class="mt-2">{{contact.email}} | {{contact.phone}}</p>
+  <p>{{contact.location}}</p>
+  {{/if}}
+</header>

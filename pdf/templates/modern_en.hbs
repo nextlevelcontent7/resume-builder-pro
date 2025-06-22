@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{resume.personalInfo.name}} - Resume</title>
+<style>
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f7f7f7; padding: 40px; }
+  .container { background: #fff; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  h1 { color: #2196f3; border-bottom: 2px solid #2196f3; padding-bottom: 10px; }
+  h2 { color: #333; margin-top: 30px; border-bottom: 1px solid #ddd; }
+  ul { list-style-type: disc; margin-left: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>{{resume.personalInfo.name}}</h1>
+  <p>{{resume.personalInfo.email}} | {{resume.personalInfo.phone}}</p>
+  <p>{{resume.personalInfo.location}}</p>
+  <div class="section">
+    <h2>{{t "education"}}</h2>
+    {{#each resume.education}}
+      <h3>{{degree}} - {{school}}</h3>
+      <p>{{formatDateRange startDate endDate}}</p>
+    {{/each}}
+  </div>
+  <div class="section">
+    <h2>{{t "experience"}}</h2>
+    {{#each resume.experience}}
+      <h3>{{jobTitle}} - {{company}}</h3>
+      <p>{{formatDateRange startDate endDate}}</p>
+      <p>{{description}}</p>
+    {{/each}}
+  </div>
+  <div class="section">
+    <h2>{{t "skills"}}</h2>
+    <ul>
+      {{#each resume.skills}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+</div>
+</body>
+</html>

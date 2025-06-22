@@ -1,1 +1,8 @@
-// Service layer placeholder for business logic
+module.exports = {
+  pdfService: require('./pdfService'),
+  resumeService: require('./resumeService'),
+  adminService: require('./adminService'),
+  remoteSyncService: require('./remoteSyncService'),
+  authService: require('./authService'),
+  syncEngine: require('../sync'),
+};
