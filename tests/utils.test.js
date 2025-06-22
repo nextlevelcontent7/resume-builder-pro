@@ -1,7 +1,22 @@
 const assert = require('assert');
-const { stringUtils, dateUtils, printUtils, i18nUtils, validators, encryptionUtils, validationUtils } = require('../utils');
+const fs = require('fs');
+const path = require('path');
+const {
+  stringUtils,
+  dateUtils,
+  printUtils,
+  i18nUtils,
+  validators,
+  encryptionUtils,
+  validationUtils,
+  slugify,
+  resumeCompleteness,
+  inputNormalizer,
+  zipExporter,
+  pdfTemplateEngine,
+} = require('../utils');
 
-function run() {
+async function run() {
   assert.strictEqual(stringUtils.toSlug('Hello World'), 'hello-world');
   assert.strictEqual(stringUtils.truncate('abcd', 3), '...');
   assert.strictEqual(stringUtils.camelCase('hello world'), 'helloWorld');
@@ -32,6 +47,32 @@ function run() {
   assert(!validators.isStrongPassword('weak'), 'Weak password passed');
   assert(validationUtils.isSlug('test-slug'), 'Valid slug failed');
   assert(!validationUtils.isSlug('Bad Slug!'), 'Invalid slug passed');
+
+  // slugify advanced options
+  assert.strictEqual(slugify('Árbol Espécial', { limit: 10 }), 'arbol-espe');
+
+  const resume = {
+    personalInfo: { name: 'John' },
+    summary: 'Test',
+    experience: [{}],
+    education: [],
+  };
+  const score = resumeCompleteness.calculate(resume);
+  assert(score < 100 && score > 0, 'Score out of range');
+
+  const normalized = inputNormalizer.normalizePhone(' (123) 555-0000 ');
+  assert.strictEqual(normalized, '1235550000');
+
+  const tmpZip = path.join(__dirname, 'tmp.zip');
+  const file = path.join(__dirname, 'sample.txt');
+  fs.writeFileSync(file, 'sample');
+  await zipExporter.createZip([file], tmpZip, { brand: 'test' });
+  assert(fs.existsSync(tmpZip), 'zip not created');
+  fs.unlinkSync(file); fs.unlinkSync(tmpZip);
+
+  const html = pdfTemplateEngine.render({ personalInfo: { name: 'A' } });
+  assert(/<html/.test(html), 'html not generated');
+
   console.log('utils tests passed');
 }
 

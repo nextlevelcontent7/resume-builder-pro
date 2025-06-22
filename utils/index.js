@@ -12,4 +12,8 @@ module.exports = {
   jwt: require('./jwt'),
   mailer: require('./mailer'),
   slugify: require('./slugify'),
+  pdfTemplateEngine: require('./pdfTemplateEngine'),
+  resumeCompleteness: require('./resumeCompleteness'),
+  zipExporter: require('./zipExporter'),
+  inputNormalizer: require('./inputNormalizer'),
 };
