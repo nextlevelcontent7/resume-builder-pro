@@ -116,7 +116,30 @@ function ensureProtocol(url) {
   if (/^https?:\/\//i.test(url)) return url;
   return `http://${url}`;
 }
+/**
 
+ * Compute a completeness score based on filled sections. Returns a number from 0 to 100.
+ */
+function computeCompleteness(doc){
+  let total = 5;
+  let score = 0;
+  if(doc.personalInfo && doc.personalInfo.firstName && doc.personalInfo.lastName){score++;}
+  if(doc.education && doc.education.length){score++;}
+  if(doc.experience && doc.experience.length){score++;}
+  if(doc.skills && doc.skills.length){score++;}
+  if(doc.certifications && doc.certifications.length){score++;}
+  return Math.round((score/total)*100);
+}
+
+/**
+ * Compute an experience score weighted by years and skill levels.
+ */
+function computeExperienceScore(doc){
+  let years=0;
+  doc.experience.forEach(e=>{if(e.startDate){const end=e.endDate||new Date();years+= (end - e.startDate)/(1000*60*60*24*365);}});
+  const avgSkill=doc.skills.reduce((acc,s)=>acc+s.level,0)/(doc.skills.length||1);
+  return Math.round(Math.min(100, years*5 + avgSkill*10));
+}
 /**
  * Build a unique slug based on the user's full name. This function checks the
  * database for existing slugs and appends a numeric suffix if needed. Because
@@ -414,6 +437,18 @@ const ResumeSchema = new Schema(
       ],
       default: [],
     },
+    templateSnapshots: {
+      type: [
+        new Schema({
+          theme: { type: String, enum: THEMES, required: true },
+          markup: String,
+          createdAt: { type: Date, default: Date.now }
+        }, { _id: false })
+      ],
+      default: []
+    },
+    completenessScore: { type: Number, default: 0, min: 0, max: 100 },
+    experienceScore: { type: Number, default: 0, min: 0, max: 100 },
 
     // Reference to the owning user
     createdBy: {
@@ -543,10 +578,12 @@ ResumeSchema.pre("validate", function (next) {
 ResumeSchema.pre("save", function (next) {
   this.settings.lastModifiedAt = new Date();
 
-  // Very naive CSS sanitization; real system should use a library
   if (this.settings.customCss) {
     this.settings.customCss = this.settings.customCss.replace(/<script.*?>.*?<\/script>/gi, "");
   }
+
+  this.completenessScore = computeCompleteness(this);
+  this.experienceScore = computeExperienceScore(this);
 
   next();
 });
@@ -923,13 +960,36 @@ ResumeSchema.methods.skillFrequency = function () {
 };
 
 /**
- * Return an array of section names that are currently visible according to the
- * resume's settings. This allows the front-end to easily hide sections without
- * replicating visibility logic.
+ * Return an array of section names that are currently visible according to the resume's settings.
  */
 ResumeSchema.methods.listVisibleSections = function () {
   const vis = this.settings.visibility || {};
   return Object.keys(vis).filter((k) => vis[k]);
+};
+
+/**
+ * Store a snapshot of the rendered template markup for later retrieval.
+ */
+ResumeSchema.methods.addTemplateSnapshot = function (theme, markup) {
+  this.templateSnapshots.push({ theme, markup });
+  if (this.templateSnapshots.length > 20) {
+    this.templateSnapshots.shift();
+  }
+  return this;
+};
+
+/**
+ * Record the current state of the resume as a version entry.
+ */
+ResumeSchema.methods.addVersion = function (comment) {
+  const data = this.toObject();
+  delete data._id;
+  delete data.versions;
+  this.versions.push({ createdAt: new Date(), comment, data });
+  if (this.versions.length > 50) {
+    this.versions.shift();
+  }
+  return this;
 };
 
 //-----------------------------------------------------------------------------
