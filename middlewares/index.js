@@ -12,4 +12,5 @@ module.exports = {
   userAgent: require('./userAgent'),
   swagger: require('./swagger'),
   slugValidator: require('./slugValidator'),
+  securityHeaders: require('./securityHeaders'),
 };

@@ -10,6 +10,7 @@ const {
   errorParser,
   rateLimiter,
   userAgent,
+  securityHeaders,
   swagger,
 } = require('./middlewares');
 const path = require('path');
@@ -22,6 +23,9 @@ app.use(express.json());
 
 // Enable CORS for all origins (configure as needed for production)
 app.use(cors());
+
+// Apply basic security headers
+app.use(securityHeaders);
 
 // Attach request ID for traceability
 app.use(requestId);

@@ -4,6 +4,7 @@ require('winston-daily-rotate-file');
 const path = require('path');
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+const LOG_DIR = process.env.LOG_DIR || 'logs';
 
 // Build log format including request ID and user agent when available
 const logFormat = format.printf(({ timestamp, level, message, meta }) => {
@@ -21,7 +22,7 @@ const logger = createLogger({
       format: format.combine(format.colorize(), format.simple()),
     }),
     new transports.DailyRotateFile({
-      filename: path.join('logs', 'app-%DATE%.log'),
+      filename: path.join(LOG_DIR, 'app-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       maxFiles: '14d',
     }),
@@ -31,7 +32,7 @@ const logger = createLogger({
 // Morgan token to include request ID
 morgan.token('id', (req) => req.id || '-');
 morgan.token('user', (req) => (req.user ? req.user.id : 'anon'));
-morgan.token('agent', (req) => req.userAgent ? req.userAgent.source : '-');
+morgan.token('agent', (req) => (req.userAgent ? req.userAgent.source : '-'));
 morgan.token('body', (req) => {
   const safe = { ...req.body };
   if (safe.password) safe.password = '***';
