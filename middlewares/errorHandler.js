@@ -3,10 +3,14 @@ const { logger } = require('./logger');
 const { error } = require('../utils/formatResponse');
 
 module.exports = (err, req, res, next) => {
-  logger.error(err.stack || err.message);
+  logger.error(err.stack || err.message, { id: req.id });
 
   const status = err.status || 500;
   const messageKey = err.messageKey || 'serverError';
 
-  res.status(status).json(error(req, messageKey));
+  const payload = error(req, messageKey);
+  if (process.env.NODE_ENV === 'development') {
+    payload.stack = err.stack;
+  }
+  res.status(status).json(payload);
 };
