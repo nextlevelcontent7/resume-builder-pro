@@ -11,4 +11,5 @@ module.exports = {
   adminOnly: require('./adminOnly'),
   userAgent: require('./userAgent'),
   swagger: require('./swagger'),
+  slugValidator: require('./slugValidator'),
 };

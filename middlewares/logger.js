@@ -3,10 +3,19 @@ const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
 
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+
+// Build log format including request ID and user agent when available
+const logFormat = format.printf(({ timestamp, level, message, meta }) => {
+  const parts = [timestamp, level.toUpperCase(), message];
+  if (meta) parts.push(JSON.stringify(meta));
+  return parts.join(' ');
+});
+
 // Setup winston logger with daily rotating log files
 const logger = createLogger({
-  level: 'info',
-  format: format.combine(format.timestamp(), format.json()),
+  level: LOG_LEVEL,
+  format: format.combine(format.timestamp(), logFormat),
   transports: [
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
@@ -22,6 +31,7 @@ const logger = createLogger({
 // Morgan token to include request ID
 morgan.token('id', (req) => req.id || '-');
 morgan.token('user', (req) => (req.user ? req.user.id : 'anon'));
+morgan.token('agent', (req) => req.userAgent ? req.userAgent.source : '-');
 morgan.token('body', (req) => {
   const safe = { ...req.body };
   if (safe.password) safe.password = '***';
@@ -30,7 +40,7 @@ morgan.token('body', (req) => {
 
 // Morgan middleware to stream logs through winston
 const morganMiddleware = morgan(
-  ':id :user :method :url :status :response-time ms :body',
+  ':id :user :agent :method :url :status :response-time ms :body',
   {
     stream: {
       write: (message) => logger.info(message.trim()),

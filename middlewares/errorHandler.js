@@ -8,5 +8,9 @@ module.exports = (err, req, res, next) => {
   const status = err.status || 500;
   const messageKey = err.messageKey || 'serverError';
 
-  res.status(status).json(error(req, messageKey));
+  const payload = error(req, messageKey);
+  if (process.env.NODE_ENV === 'development') {
+    payload.stack = err.stack;
+  }
+  res.status(status).json(payload);
 };

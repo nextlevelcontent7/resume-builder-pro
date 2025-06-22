@@ -1,8 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 
-// Serve swagger.yaml file as JSON
+// Serve the OpenAPI specification. Location can be overridden via SWAGGER_PATH.
 module.exports = function swagger(req, res) {
-  const spec = fs.readFileSync(path.join(__dirname, '..', 'docs', 'swagger.yaml'), 'utf8');
+  const specPath = process.env.SWAGGER_PATH || path.join(__dirname, '..', 'docs', 'swagger.yaml');
+  const spec = fs.readFileSync(specPath, 'utf8');
   res.type('text/yaml').send(spec);
 };

@@ -1,7 +1,8 @@
-const RATE_LIMIT = 100; // requests per IP per minute
-const INTERVAL = 60 * 1000; // 1 minute in ms
+const RATE_LIMIT = parseInt(process.env.RATE_LIMIT || '100', 10);
+const INTERVAL = parseInt(process.env.RATE_INTERVAL_MS || `${60 * 1000}`, 10);
 
-// Simple in-memory rate limiting bucket per IP
+// Buckets keyed by IP for naive rate limiting; memory resets each restart.
+// In production this would be backed by Redis or similar.
 const buckets = new Map();
 
 module.exports = function rateLimiter(req, res, next) {
@@ -10,12 +11,13 @@ module.exports = function rateLimiter(req, res, next) {
   if (!buckets.has(ip)) buckets.set(ip, []);
   const timestamps = buckets.get(ip);
 
-  // Drop outdated timestamps
+  // Remove timestamps older than the interval
   while (timestamps.length && timestamps[0] <= now - INTERVAL) {
     timestamps.shift();
   }
 
   if (timestamps.length >= RATE_LIMIT) {
+    res.setHeader('Retry-After', Math.ceil(INTERVAL / 1000));
     return res.status(429).json({ success: false, message: 'Too many requests' });
   }
 

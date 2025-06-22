@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { stringUtils, dateUtils, printUtils, i18nUtils, validators, encryptionUtils } = require('../utils');
+const { stringUtils, dateUtils, printUtils, i18nUtils, validators, encryptionUtils, validationUtils } = require('../utils');
 
 function run() {
   assert.strictEqual(stringUtils.toSlug('Hello World'), 'hello-world');
@@ -30,6 +30,8 @@ function run() {
   assert(!validators.isPostalCode('zzz'), 'Invalid postal code passed');
   assert(validators.isStrongPassword('Aa1!aaaa'), 'Strong password check failed');
   assert(!validators.isStrongPassword('weak'), 'Weak password passed');
+  assert(validationUtils.isSlug('test-slug'), 'Valid slug failed');
+  assert(!validationUtils.isSlug('Bad Slug!'), 'Invalid slug passed');
   console.log('utils tests passed');
 }
 

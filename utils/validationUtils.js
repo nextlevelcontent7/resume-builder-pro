@@ -31,6 +31,10 @@ function isStrongPassword(pwd, opts = { minLength: 8, hasNumber: true, hasSymbol
   return /[A-Z]/.test(pwd) && /[a-z]/.test(pwd);
 }
 
+function isSlug(str) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(str);
+}
+
 module.exports = {
   isNonEmptyString,
   isPositiveInteger,
@@ -38,4 +42,5 @@ module.exports = {
   isDate,
   isPostalCode,
   isStrongPassword,
+  isSlug,
 };

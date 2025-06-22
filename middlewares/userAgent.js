@@ -2,7 +2,6 @@
 // Avoids external dependencies for easier deploy.
 module.exports = function userAgent(req, res, next) {
   const ua = req.headers['user-agent'] || '';
-  // naive checks for device type
   const mobile = /mobile/i.test(ua);
   const os = /windows/i.test(ua)
     ? 'windows'
@@ -11,7 +10,14 @@ module.exports = function userAgent(req, res, next) {
     : /linux/i.test(ua)
     ? 'linux'
     : 'unknown';
+  const browser = /chrome/i.test(ua)
+    ? 'chrome'
+    : /safari/i.test(ua)
+    ? 'safari'
+    : /firefox/i.test(ua)
+    ? 'firefox'
+    : 'unknown';
 
-  req.userAgent = { source: ua, mobile, os };
+  req.userAgent = { source: ua, mobile, os, browser };
   next();
 };
