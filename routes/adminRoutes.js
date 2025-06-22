@@ -1,35 +1,71 @@
+/**
+ * Admin routes provide privileged management capabilities for user accounts,
+ * resumes, application settings and logs. Each endpoint is protected by
+ * authentication and the `adminOnly` middleware to enforce RBAC.
+ */
 const router = require('express').Router();
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 const { auth, adminOnly } = require('../middlewares');
-const {
-  listUsers,
-  updateUser,
-  listResumes,
-  updateResume,
-  viewLogs,
-  getSettings,
-  updateSettings,
-  toggleFeature,
-  listFeatures,
-  analytics,
-} = require('../controllers/adminController');
+const ctrl = require('../controllers/adminController');
 
+// Wrap async route handlers and forward errors to the error middleware
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Apply authentication and role check to all admin endpoints
 router.use(auth, adminOnly);
 
-router.get('/users', listUsers);
-router.put('/users/:id', param('id').isMongoId(), body('name').optional(), updateUser);
+/**
+ * @swagger
+ * /admin/users:
+ *   get:
+ *     summary: List users with optional search and pagination
+ */
+router.get(
+  '/users',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('q').optional().isString(),
+  ],
+  asyncHandler(ctrl.listUsers)
+);
 
-router.get('/resumes', listResumes);
-router.put('/resumes/:id', param('id').isMongoId(), updateResume);
+router.put(
+  '/users/:id',
+  [param('id').isMongoId(), body('name').optional().isString()],
+  asyncHandler(ctrl.updateUser)
+);
 
-router.get('/logs', viewLogs);
+router.get(
+  '/resumes',
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('status').optional().isString(),
+  ],
+  asyncHandler(ctrl.listResumes)
+);
 
-router.get('/features', listFeatures);
+router.put(
+  '/resumes/:id',
+  param('id').isMongoId(),
+  asyncHandler(ctrl.updateResume)
+);
 
-router.get('/settings', getSettings);
-router.post('/settings', updateSettings);
-router.post('/features/:key/toggle', toggleFeature);
+router.get(
+  '/logs',
+  [query('level').optional().isIn(['info', 'error', 'warn'])],
+  asyncHandler(ctrl.viewLogs)
+);
 
-router.get('/analytics', analytics);
+router.get('/features', asyncHandler(ctrl.listFeatures));
+
+router.get('/settings', asyncHandler(ctrl.getSettings));
+router.post('/settings', asyncHandler(ctrl.updateSettings));
+router.post('/features/:key/toggle', asyncHandler(ctrl.toggleFeature));
+
+router.get('/analytics', asyncHandler(ctrl.analytics));
 
 module.exports = router;
