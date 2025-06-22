@@ -17,11 +17,25 @@ class AuthService {
     });
   }
 
+  verifyAccessToken(token) {
+    try {
+      return jwt.verify(token, JWT_SECRET);
+    } catch (_) {
+      return null;
+    }
+  }
+
   generateRefreshToken(user) {
     const token = jwt.sign({ id: user._id }, REFRESH_SECRET, { expiresIn: '7d' });
     user.refreshTokens.push(token);
     user.save();
     return token;
+  }
+
+  // Revoke a refresh token by removing it from user document
+  async revokeRefreshToken(user, token) {
+    user.refreshTokens = user.refreshTokens.filter((t) => t !== token);
+    await user.save();
   }
 
   async login(email, password) {
@@ -43,6 +57,17 @@ class AuthService {
       return this.generateAccessToken(user);
     } catch (err) {
       throw new Error('invalid');
+    }
+  }
+
+  // Logout by revoking the provided refresh token
+  async logout(token) {
+    try {
+      const payload = jwt.verify(token, REFRESH_SECRET);
+      const user = await User.findById(payload.id);
+      if (user) await this.revokeRefreshToken(user, token);
+    } catch (_) {
+      // ignore invalid token
     }
   }
 
@@ -74,6 +99,7 @@ class AuthService {
     const user = await User.findOne({ email });
     if (!user) return;
     user.resetPasswordToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordExpires = Date.now() + 3600_000; // 1 hour
     await user.save();
     await transporter.sendMail({
       to: user.email,
@@ -83,10 +109,14 @@ class AuthService {
   }
 
   async resetPassword(token, newPassword) {
-    const user = await User.findOne({ resetPasswordToken: token });
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
     if (!user) throw new Error('invalid');
     user.password = newPassword;
     user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
     await user.save();
   }
 }

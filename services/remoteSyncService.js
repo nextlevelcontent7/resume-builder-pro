@@ -14,6 +14,10 @@ class RemoteSyncService {
     this.endpoint = endpoint;
   }
 
+  setEndpoint(endpoint) {
+    this.endpoint = endpoint;
+  }
+
   /**
    * Helper to perform an HTTP request and return the parsed JSON response.
    * @param {string} method HTTP method
@@ -45,7 +49,10 @@ class RemoteSyncService {
           }
         });
       });
-      req.on('error', reject);
+      req.on('error', (err) => {
+        console.error('Remote request failed', err.message);
+        reject(err);
+      });
       if (body) req.write(JSON.stringify(body));
       req.end();
     });
@@ -66,6 +73,17 @@ class RemoteSyncService {
     }
   }
 
+  // Perform partial update of remote resume
+  async updateRemote(id, changes) {
+    try {
+      await this.request('PATCH', `/resumes/${id}`, changes);
+      return true;
+    } catch (err) {
+      console.error('Failed to update remote resume', err.message);
+      return false;
+    }
+  }
+
   /**
    * Fetch list of remote resumes. Supports pagination via query params.
    */
@@ -78,6 +96,16 @@ class RemoteSyncService {
     } catch (err) {
       console.error('Failed to fetch remote list', err.message);
       return [];
+    }
+  }
+
+  // Retrieve status information about remote service
+  async status() {
+    try {
+      return await this.request('GET', '/status');
+    } catch (err) {
+      console.error('Remote status check failed', err.message);
+      return { ok: false };
     }
   }
 

@@ -4,6 +4,9 @@ const handlebars = require('handlebars');
 const pdf = require('html-pdf');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
+const crypto = require('crypto');
+
+const cache = new Map();
 
 /**
  * Very small sanitizer to strip <script> tags. In production
@@ -60,7 +63,7 @@ function renderHtml(resume, locale, theme) {
 async function generate(resume, locale = 'en', theme = 'default', format = 'pdf', options = {}) {
   const html = sanitizeHtml(renderHtml(resume, locale, theme));
 
-  const { watermark = true } = options;
+  const { watermark = true, orientation = 'portrait' } = options;
 
   const exportsDir = path.join(__dirname, '..', 'exports');
   if (!fs.existsSync(exportsDir)) {
@@ -70,9 +73,14 @@ async function generate(resume, locale = 'en', theme = 'default', format = 'pdf'
   const filename = `resume-${resume._id}-${Date.now()}.${format}`;
   const filePath = path.join(exportsDir, filename);
 
+  const hash = crypto.createHash('md5').update(resume._id + String(resume.updatedAt) + format + locale + theme).digest('hex');
+  if (cache.has(hash)) {
+    return cache.get(hash);
+  }
+
   // generate base PDF using html-pdf for reliable layout
   const basePdf = await new Promise((resolve, reject) => {
-    pdf.create(html, { format: 'A4', border: '10mm' }).toBuffer((err, buffer) => {
+    pdf.create(html, { format: 'A4', border: '10mm', orientation }).toBuffer((err, buffer) => {
       if (err) return reject(err);
       resolve(buffer);
     });
@@ -102,6 +110,7 @@ async function generate(resume, locale = 'en', theme = 'default', format = 'pdf'
 
   if (format === 'pdf') {
     await fs.promises.writeFile(filePath, pdfBuffer);
+    cache.set(hash, filePath);
     return filePath;
   }
 
@@ -118,6 +127,8 @@ async function generate(resume, locale = 'en', theme = 'default', format = 'pdf'
     await browser.close();
     fs.unlinkSync(tmpPath);
   }
+
+  cache.set(hash, filePath);
 
   return filePath;
 }
@@ -150,4 +161,8 @@ async function generateBulk(resumes, locale = 'en', theme = 'default') {
   return zipPath;
 }
 
-module.exports = { generate, generateBulk };
+function clearCache() {
+  cache.clear();
+}
+
+module.exports = { generate, generateBulk, clearCache };

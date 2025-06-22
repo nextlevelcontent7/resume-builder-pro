@@ -1,6 +1,7 @@
 const Resume = require('../models/Resume');
 const pdfService = require('./pdfService');
 const { remoteSyncService } = require('./index');
+const { validationUtils, slugify } = require('../utils');
 
 /**
  * Service layer encapsulating resume CRUD operations and export logic.
@@ -8,6 +9,10 @@ const { remoteSyncService } = require('./index');
 class ResumeService {
   /** Create a new resume document */
   async create(data) {
+    if (!validationUtils.isNonEmptyString(data.title)) {
+      throw new Error('invalidTitle');
+    }
+    data.slug = slugify(data.title);
     return Resume.create(data);
   }
 
@@ -42,12 +47,18 @@ class ResumeService {
 
   /** Update resume by ID */
   async update(id, updates) {
-    return Resume.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    const safe = { ...updates };
+    if (safe.title && !validationUtils.isNonEmptyString(safe.title)) {
+      throw new Error('invalidTitle');
+    }
+    if (safe.title) safe.slug = slugify(safe.title);
+    return Resume.findByIdAndUpdate(id, safe, { new: true, runValidators: true });
   }
 
   /** Delete resume by ID */
   async remove(id) {
-    return Resume.findByIdAndDelete(id);
+    const res = await Resume.findByIdAndDelete(id);
+    return res;
   }
 
   /** Archive resume by ID without deleting */
@@ -157,6 +168,19 @@ class ResumeService {
     return remoteId;
   }
 
+  async restoreFromRemote(remoteId) {
+    const data = await remoteSyncService.restoreResume(remoteId);
+    if (!data) return null;
+    data.remoteId = remoteId;
+    const existing = await Resume.findOne({ 'settings.remoteId': remoteId });
+    if (existing) {
+      await Resume.updateOne({ _id: existing._id }, data);
+      return existing._id;
+    }
+    const doc = await Resume.create(data);
+    return doc._id;
+  }
+
   /**
    * Return basic file metadata for a given resume
    * @param {string} id resume id
@@ -166,6 +190,11 @@ class ResumeService {
     if (!res || !res.resumeFile) return null;
     const { filename, mimetype, size } = res.resumeFile;
     return { filename, mimetype, size, updatedAt: res.updatedAt, createdAt: res.createdAt };
+  }
+
+  async addTag(id, tag) {
+    if (!validationUtils.isNonEmptyString(tag)) throw new Error('invalidTag');
+    return Resume.findByIdAndUpdate(id, { $addToSet: { tags: tag } }, { new: true });
   }
 
   /**
@@ -185,6 +214,11 @@ class ResumeService {
   async exportAll() {
     const all = await Resume.find();
     return pdfService.generateBulk(all.map(r => r.toObject()));
+  }
+
+  async listByTag(tag) {
+    if (!validationUtils.isNonEmptyString(tag)) return [];
+    return Resume.find({ tags: tag }).sort({ updatedAt: -1 });
   }
 }
 
