@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>{{resume.personalInfo.name}} - السيرة الذاتية</title>
+<style>
+  body { font-family: Tahoma, sans-serif; direction: rtl; }
+  .section { margin-bottom: 20px; }
+  h1, h2 { color: #333; }
+</style>
+</head>
+<body>
+  <h1>{{resume.personalInfo.name}}</h1>
+  <p>{{resume.personalInfo.email}} | {{resume.personalInfo.phone}}</p>
+  <p>{{resume.personalInfo.location}}</p>
+
+  <div class="section">
+    <h2>{{t "education"}}</h2>
+    {{#each resume.education}}
+      <h3>{{degree}} - {{school}}</h3>
+      <p>{{formatDateRange startDate endDate}}</p>
+    {{/each}}
+  </div>
+
+  <div class="section">
+    <h2>{{t "experience"}}</h2>
+    {{#each resume.experience}}
+      <h3>{{jobTitle}} - {{company}}</h3>
+      <p>{{formatDateRange startDate endDate}}</p>
+      <p>{{description}}</p>
+    {{/each}}
+  </div>
+
+  <div class="section">
+    <h2>{{t "skills"}}</h2>
+    <ul>
+      {{#each resume.skills}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  </div>
+</body>
+</html>

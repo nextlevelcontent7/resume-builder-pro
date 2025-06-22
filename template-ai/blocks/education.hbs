@@ -1,0 +1,11 @@
+<section class="mb-4">
+  <h2 class="text-xl font-semibold mb-2">Education</h2>
+  <ul>
+    {{#each education}}
+    <li class="mb-2">
+      <strong>{{institution}}</strong> - {{degree}} ({{start}} - {{end}})
+      <p>{{field}}</p>
+    </li>
+    {{/each}}
+  </ul>
+</section>

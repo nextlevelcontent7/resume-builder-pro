@@ -28,5 +28,22 @@
   "light": "Light",
   "resumeCreated": "Resume created successfully",
   "exportSuccess": "PDF generated successfully",
-  "error": "Something went wrong"
+  "error": "Something went wrong",
+  "loading": "Loading",
+  "prev": "Prev",
+  "next": "Next",
+  "admin": "Admin",
+  "dashboard": "Dashboard",
+  "users": "Users",
+  "resumes": "Resumes",
+  "settings": "Settings",
+  "logs": "Logs",
+  "analytics": "Analytics",
+  "logout": "Logout",
+  "adminLogin": "Admin Login",
+  "login": "Login",
+  "loginFailed": "Login failed",
+  "title": "Title",
+  "user": "User",
+  "updated": "Updated"
 }

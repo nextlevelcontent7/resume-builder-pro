@@ -1,0 +1,11 @@
+<section class="mb-4">
+  <h2 class="text-xl font-semibold mb-2">Experience</h2>
+  <ul>
+    {{#each experience}}
+    <li class="mb-2">
+      <strong>{{company}}</strong> - {{position}} ({{start}} - {{end}})
+      <p>{{description}}</p>
+    </li>
+    {{/each}}
+  </ul>
+</section>

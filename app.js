@@ -1,7 +1,18 @@
 // Express application setup with common middleware
 const express = require('express');
 const cors = require('cors');
-const { notFound, errorHandler, logger } = require('./middlewares');
+const {
+  notFound,
+  errorHandler,
+  logger,
+  requestId,
+  userAuditLogger,
+  errorParser,
+  rateLimiter,
+  userAgent,
+  securityHeaders,
+  swagger,
+} = require('./middlewares');
 const path = require('path');
 const i18n = require('./utils/i18n');
 
@@ -12,6 +23,21 @@ app.use(express.json());
 
 // Enable CORS for all origins (configure as needed for production)
 app.use(cors());
+
+// Apply basic security headers
+app.use(securityHeaders);
+
+// Attach request ID for traceability
+app.use(requestId);
+
+// Capture basic User-Agent information for analytics and security purposes
+app.use(userAgent);
+
+// Basic in-memory rate limiter to prevent abuse
+app.use(rateLimiter);
+
+// Audit log each request after user is attached
+app.use(userAuditLogger);
 
 // Request logging
 app.use(logger.morganMiddleware);
@@ -25,10 +51,21 @@ app.use('/exports', express.static(path.join(__dirname, 'exports')));
 // Register application routes
 const baseRoutes = require('./routes');
 const resumeRoutes = require('./routes/resumeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
+const templateAiRoutes = require('./routes/templateAiRoutes');
 app.use('/api', baseRoutes);
 app.use('/api/resumes', resumeRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/templates', templateAiRoutes);
+app.get('/api-docs', swagger);
 
 // Handle 404 errors
+
+// Translate common validation errors
+app.use(errorParser);
+
 app.use(notFound);
 
 // Generic error handler
